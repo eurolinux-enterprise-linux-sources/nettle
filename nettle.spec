@@ -1,6 +1,6 @@
 Name:           nettle
 Version:        2.7.1
-Release:        4%{?dist}
+Release:        8%{?dist}
 Summary:        A low-level cryptographic library
 
 Group:          Development/Libraries
@@ -10,9 +10,13 @@ Source0:	%{name}-%{version}-hobbled.tar.gz
 #Source0:        http://www.lysator.liu.se/~nisse/archive/%{name}-%{version}.tar.gz
 Patch0:		nettle-2.7.1-remove-ecc-testsuite.patch
 Patch1:		nettle-2.7.1-tmpalloc.patch
+Patch2:		nettle-2.7.1-sha3-fix.patch
+Patch3:		nettle-2.7.1-ecc-cve.patch
+Patch4:		nettle-2.7.1-powm-sec.patch
 
 BuildRequires:  gmp-devel m4 texinfo-tex texlive-dvips ghostscript
 BuildRequires:  fipscheck
+BuildRequires:	libtool, automake, autoconf, texinfo
 
 Requires(post): info
 Requires(preun): info
@@ -46,6 +50,9 @@ sed 's/ecc-192.c//g' -i Makefile.in
 sed 's/ecc-224.c//g' -i Makefile.in
 %patch0 -p1
 %patch1 -p1 -b .tmpalloc
+%patch2 -p1 -b .sha3
+%patch3 -p1 -b .ecc-cve
+%patch4 -p1 -b .powm-sec
 
 %build
 %configure --enable-shared
@@ -111,6 +118,15 @@ fi
 
 
 %changelog
+* Mon Aug  8 2016 Nikos Mavrogiannopoulos <nmav@redhat.com> - 2.7.1-8
+- Use a cache-silent version of mpz_powm to prevent cache-timing
+  attacks against RSA and DSA in shared VMs. (#1364897,CVE-2016-6489)
+
+* Wed Mar  2 2016 Nikos Mavrogiannopoulos <nmav@redhat.com> - 2.7.1-5
+- Fixed SHA-3 implementation to conform to final standard (#1252936)
+- Fixed CVE-2015-8803 CVE-2015-8804 CVE-2015-8805 which caused issues
+  in secp256r1 and secp384r1 calculations (#1314374)
+
 * Tue Jul 29 2014 Nikos Mavrogiannopoulos <nmav@redhat.com> - 2.7.1-4
 - Correct path of links (#1117782)
 
