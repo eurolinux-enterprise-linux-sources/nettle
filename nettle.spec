@@ -1,6 +1,6 @@
 Name:           nettle
 Version:        2.7.1
-Release:        2%{?dist}
+Release:        4%{?dist}
 Summary:        A low-level cryptographic library
 
 Group:          Development/Libraries
@@ -12,6 +12,7 @@ Patch0:		nettle-2.7.1-remove-ecc-testsuite.patch
 Patch1:		nettle-2.7.1-tmpalloc.patch
 
 BuildRequires:  gmp-devel m4 texinfo-tex texlive-dvips ghostscript
+BuildRequires:  fipscheck
 
 Requires(post): info
 Requires(preun): info
@@ -50,6 +51,16 @@ sed 's/ecc-224.c//g' -i Makefile.in
 %configure --enable-shared
 make %{?_smp_mflags}
 
+%define __spec_install_post \
+	%{?__debug_package:%{__debug_install_post}} \
+	%{__arch_install_post} \
+	%{__os_install_post} \
+	fipshmac -d $RPM_BUILD_ROOT%{_libdir} $RPM_BUILD_ROOT%{_libdir}/libnettle.so.4.* \
+	fipshmac -d $RPM_BUILD_ROOT%{_libdir} $RPM_BUILD_ROOT%{_libdir}/libhogweed.so.2.* \
+	file=`basename $RPM_BUILD_ROOT%{_libdir}/libnettle.so.4.*.hmac` && mv $RPM_BUILD_ROOT%{_libdir}/$file $RPM_BUILD_ROOT%{_libdir}/.$file && ln -s .$file $RPM_BUILD_ROOT%{_libdir}/.libnettle.so.4.hmac \
+	file=`basename $RPM_BUILD_ROOT%{_libdir}/libhogweed.so.2.*.hmac` && mv $RPM_BUILD_ROOT%{_libdir}/$file $RPM_BUILD_ROOT%{_libdir}/.$file && ln -s .$file $RPM_BUILD_ROOT%{_libdir}/.libhogweed.so.2.hmac \
+%{nil}
+
 
 %install
 make install DESTDIR=$RPM_BUILD_ROOT INSTALL="install -p"
@@ -74,6 +85,8 @@ make check
 %{_libdir}/libnettle.so.4.*
 %{_libdir}/libhogweed.so.2
 %{_libdir}/libhogweed.so.2.*
+%{_libdir}/.libhogweed.so.*.hmac
+%{_libdir}/.libnettle.so.*.hmac
 
 
 %files devel
@@ -98,6 +111,12 @@ fi
 
 
 %changelog
+* Tue Jul 29 2014 Nikos Mavrogiannopoulos <nmav@redhat.com> - 2.7.1-4
+- Correct path of links (#1117782)
+
+* Mon Jul 28 2014 Nikos Mavrogiannopoulos <nmav@redhat.com> - 2.7.1-3
+- Added fipshmac checksum (#1117782)
+
 * Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 2.7.1-2
 - Mass rebuild 2014-01-24
 
