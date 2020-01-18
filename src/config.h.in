@@ -48,19 +48,6 @@
 /* Define if mpz_powm_sec is available (appeared in GMP-5) */
 #undef HAVE_MPZ_POWM_SEC
 
-/* Define to 1 each of the following for which a native (ie. CPU specific)
-    implementation of the corresponding routine exists.  */
-#undef HAVE_NATIVE_ecc_192_modp
-#undef HAVE_NATIVE_ecc_192_redc
-#undef HAVE_NATIVE_ecc_224_modp
-#undef HAVE_NATIVE_ecc_224_redc
-#undef HAVE_NATIVE_ecc_256_modp
-#undef HAVE_NATIVE_ecc_256_redc
-#undef HAVE_NATIVE_ecc_384_modp
-#undef HAVE_NATIVE_ecc_384_redc
-#undef HAVE_NATIVE_ecc_521_modp
-#undef HAVE_NATIVE_ecc_521_redc
-
 /* Define to 1 if you have the <openssl/aes.h> header file. */
 #undef HAVE_OPENSSL_AES_H
 

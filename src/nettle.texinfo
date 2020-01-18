@@ -7,14 +7,14 @@
 @syncodeindex fn cp
 @c %**end of header
 
-@set UPDATED-FOR 2.7
+@set UPDATED-FOR 2.6
 @set AUTHOR Niels Möller
 
 @copying
 This manual is for the Nettle library (version @value{UPDATED-FOR}), a
 low-level cryptographic library.
 
-Originally written 2001 by @value{AUTHOR}, updated 2013.
+Originally written 2001 by @value{AUTHOR}, updated 2012.
 
 @quotation
 This manual is placed in the public domain. You may freely copy it, in
@@ -22,12 +22,6 @@ whole or in part, with or without modification. Attribution is
 appreciated, but not required.
 @end quotation
 @end copying
-
-@ifnottex
-@macro pmod {m} 
-(mod \m\)
-@end macro
-@end ifnottex
 
 @titlepage
 @title Nettle Manual
@@ -61,7 +55,7 @@ object-oriented wrapper for your favorite language or application.
 * Copyright::                   Your rights.
 * Conventions::                 General interface conventions.
 * Example::                     An example program.
-* Linking::                     Linking with libnettle and libhogweed.
+* Linking::                     Linking with the libnettle and libhogweed.
 * Reference::                   All Nettle functions and features.
 * Nettle soup::                 For the serious nettle hacker.
 * Installation::                How to install Nettle.
@@ -79,7 +73,7 @@ Reference
 * Key derivation functions::    
 * Public-key algorithms::       
 * Randomness::                  
-* ASCII encoding::              
+* Ascii encoding::              
 * Miscellaneous functions::     
 * Compatibility functions::     
 
@@ -93,7 +87,6 @@ Public-key algorithms
 
 * RSA::                         The RSA public key algorithm.
 * DSA::                         The DSA digital signature algorithm.
-* Elliptic curves::             Elliptic curves and ECDSA
 
 @end detailmenu
 @end menu
@@ -182,11 +175,6 @@ Released into the public domain.
 The implementation of the DES cipher is written by Dana L. How, and
 released under the LGPL.
 
-@item GOSTHASH94
-The C implementation of the GOST94 message digest is written by 
-Aleksey Kravchenko and was ported from the rhash library by Nikos
-Mavrogiannopoulos. It is released under the MIT license.
-
 @item MD2
 The implementation of MD2 is written by Andrew Kuchling, and hacked
 some by Andreas Sigfridsson and @value{AUTHOR}. Python Cryptography
@@ -201,11 +189,7 @@ The implementation of the MD5 message digest is written by Colin Plumb.
 It has been hacked some more by Andrew Kuchling and @value{AUTHOR}.
 Released into the public domain.
 
-@item PBKDF2
-The C implementation of PBKDF2 is based on earlier work for Shishi and
-GnuTLS by Simon Josefsson.  Released under the LGPL.
-
-@item RIPEMD160
+@item RIPMED160
 The implementation of RIPEMD160 message digest is based on the code in
 libgcrypt, copyright owned by the Free Software Foundation. Ported to
 Nettle by Andres Mejia. Released under the LGPL.
@@ -213,8 +197,12 @@ Nettle by Andres Mejia. Released under the LGPL.
 @item SALSA20
 The C implementation of SALSA20 is based on D. J. Bernstein's reference
 implementation (in the public domain), adapted to Nettle by Simon
-Josefsson, and heavily modified by Niels Möller. Assembly for x86_64 and
-ARM by Niels Möller. Released under the LGPL.
+Josefsson, and heavily modified by Niels Möller. Assembly for x86_64 by
+Niels Möller. Released under the LGPL.
+
+@item PBKDF2
+The C implementation of PBKDF2 is based on earlier work for Shishi and
+GnuTLS by Simon Josefsson.  Released under the LGPL.
 
 @item SERPENT
 The implementation of the SERPENT cipher is based on the code in libgcrypt,
@@ -225,8 +213,8 @@ x86_64 by Niels Möller. Released under the LGPL.
 @item SHA1
 The C implementation of the SHA1 message digest is written by Peter
 Gutmann, and hacked some more by Andrew Kuchling and @value{AUTHOR}.
-Released into the public domain. Assembler for x86, x86_64 and ARM by
-@value{AUTHOR}, released under the LGPL.
+Released into the public domain. Assembler for x86 by @value{AUTHOR},
+released under the LGPL.
 
 @item SHA2
 Written by @value{AUTHOR}, using Peter Gutmann's SHA1 code as a model. 
@@ -235,12 +223,14 @@ Released under the LGPL.
 @item SHA3
 Written by @value{AUTHOR}. Released under the LGPL.
 
+@item GOSTHASH94
+The C implementation of the GOST94 message digest is written by 
+Aleksey Kravchenko and was ported from the rhash library by Nikos
+Mavrogiannopoulos. It is released under the MIT license.
+
 @item TWOFISH
 The implementation of the TWOFISH cipher is written by Ruud de Rooij.
 Released under the LGPL.
-
-@item UMAC
-Written by @value{AUTHOR}. Released under the LGPL.
 
 @item RSA
 Written by @value{AUTHOR}, released under the LGPL. Uses the GMP library
@@ -249,11 +239,6 @@ for bignum operations.
 @item DSA
 Written by @value{AUTHOR}, released under the LGPL. Uses the GMP library
 for bignum operations.
-
-@item ECDSA
-Written by @value{AUTHOR}, released under the LGPL. Uses the GMP library
-for bignum operations. Development of Nettle's ECC support was funded by
-the .SE Internet Fund.
 @end table
 
 @node Conventions, Example, Copyright, Top
@@ -302,7 +287,7 @@ functions which can fail, return one on success and zero on failure.
 @chapter Example
 
 A simple example program that reads a file from standard input and
-writes its SHA1 check-sum on standard output should give the flavor of
+writes its SHA1 checksum on standard output should give the flavor of
 Nettle.
 
 @example
@@ -347,7 +332,7 @@ This chapter describes all the Nettle functions, grouped by family.
 * Key derivation functions::    
 * Public-key algorithms::       
 * Randomness::                  
-* ASCII encoding::              
+* Ascii encoding::              
 * Miscellaneous functions::     
 * Compatibility functions::     
 @end menu
@@ -559,7 +544,7 @@ This function also resets the context in the same way as
 
 @subsubsection @acronym{SHA3-224}
 
-The SHA3 hash functions were specified by NIST in response to weaknesses
+The SHA3 hash functions were specified by NIST in repsonse to weaknesses
 in SHA1, and doubts about SHA2 hash functions which structurally are
 very similar to SHA1. The standard is a result of a competition, where
 the winner, also known as Keccak, was designed by Guido Bertoni, Joan
@@ -1071,7 +1056,7 @@ keys. Nettle defines AES in @file{<nettle/aes.h>}.
 @end deftp
 
 @defvr Constant AES_BLOCK_SIZE
-The AES block-size, 16.
+The AES block-size, 16
 @end defvr
 
 @defvr Constant AES_MIN_KEY_SIZE
@@ -1081,7 +1066,7 @@ The AES block-size, 16.
 @end defvr
 
 @defvr Constant AES_KEY_SIZE
-Default AES key size, 32.
+Default AES key size, 32
 @end defvr
 
 @deftypefun void aes_set_encrypt_key (struct aes_ctx *@var{ctx}, unsigned @var{length}, const uint8_t *@var{key})
@@ -1147,15 +1132,15 @@ Nettle defines ARCFOUR in @file{<nettle/arcfour.h>}.
 @end deftp
 
 @defvr Constant ARCFOUR_MIN_KEY_SIZE
-Minimum key size, 1.
+Minimum key size, 1
 @end defvr
 
 @defvr Constant ARCFOUR_MAX_KEY_SIZE
-Maximum key size, 256.
+Maximum key size, 256
 @end defvr
 
 @defvr Constant ARCFOUR_KEY_SIZE
-Default ARCFOUR key size, 16.
+Default ARCFOUR key size, 16
 @end defvr
 
 @deftypefun void arcfour_set_key (struct arcfour_ctx *@var{ctx}, unsigned @var{length}, const uint8_t *@var{key})
@@ -1193,7 +1178,7 @@ standards.
 @end deftp
 
 @defvr Constant ARCTWO_BLOCK_SIZE
-The ARCTWO block-size, 8.
+The ARCTWO block-size, 8
 @end defvr
 
 @defvr Constant ARCTWO_MIN_KEY_SIZE
@@ -1203,7 +1188,7 @@ The ARCTWO block-size, 8.
 @end defvr
 
 @defvr Constant ARCTWO_KEY_SIZE
-Default ARCTWO key size, 8.
+Default ARCTWO key size, 8
 @end defvr
 
 @deftypefun void arctwo_set_key_ekb (struct arctwo_ctx *@var{ctx}, unsigned @var{length}, const uint8_t *@var{key}, unsigned @var{ekb})
@@ -1242,19 +1227,19 @@ has some weak keys. Nettle defines BLOWFISH in @file{<nettle/blowfish.h>}.
 @end deftp
 
 @defvr Constant BLOWFISH_BLOCK_SIZE
-The BLOWFISH block-size, 8.
+The BLOWFISH block-size, 8
 @end defvr
 
 @defvr Constant BLOWFISH_MIN_KEY_SIZE
-Minimum BLOWFISH key size, 8.
+Minimum BLOWFISH key size, 8
 @end defvr
 
 @defvr Constant BLOWFISH_MAX_KEY_SIZE
-Maximum BLOWFISH key size, 56.
+Maximum BLOWFISH key size, 56
 @end defvr
 
 @defvr Constant BLOWFISH_KEY_SIZE
-Default BLOWFISH key size, 16.
+Default BLOWFISH key size, 16
 @end defvr
 
 @deftypefun int blowfish_set_key (struct blowfish_ctx *@var{ctx}, unsigned @var{length}, const uint8_t *@var{key})
@@ -1298,7 +1283,7 @@ is 128 bits (16 octets), and the supported key sizes are 128, 192, and
 @end deftp
 
 @defvr Constant CAMELLIA_BLOCK_SIZE
-The CAMELLIA block-size, 16.
+The CAMELLIA block-size, 16
 @end defvr
 
 @defvr Constant CAMELLIA_MIN_KEY_SIZE
@@ -1308,7 +1293,7 @@ The CAMELLIA block-size, 16.
 @end defvr
 
 @defvr Constant CAMELLIA_KEY_SIZE
-Default CAMELLIA key size, 32.
+Default CAMELLIA key size, 32
 @end defvr
 
 @deftypefun void camellia_set_encrypt_key (struct camellia_ctx *@var{ctx}, unsigned @var{length}, const uint8_t *@var{key})
@@ -1344,19 +1329,19 @@ Nettle defines cast128 in @file{<nettle/cast128.h>}.
 @end deftp
 
 @defvr Constant CAST128_BLOCK_SIZE
-The CAST128 block-size, 8.
+The CAST128 block-size, 8
 @end defvr
 
 @defvr Constant CAST128_MIN_KEY_SIZE
-Minimum CAST128 key size, 5.
+Minimum CAST128 key size, 5
 @end defvr
 
 @defvr Constant CAST128_MAX_KEY_SIZE
-Maximum CAST128 key size, 16.
+Maximum CAST128 key size, 16
 @end defvr
 
 @defvr Constant CAST128_KEY_SIZE
-Default CAST128 key size, 16.
+Default CAST128 key size, 16
 @end defvr
 
 @deftypefun void cast128_set_key (struct cast128_ctx *@var{ctx}, unsigned @var{length}, const uint8_t *@var{key})
@@ -1395,11 +1380,11 @@ DES also has some weak keys. Nettle defines DES in @file{<nettle/des.h>}.
 @end deftp
 
 @defvr Constant DES_BLOCK_SIZE
-The DES block-size, 8.
+The DES block-size, 8
 @end defvr
 
 @defvr Constant DES_KEY_SIZE
-DES key size, 8.
+DES key size, 8
 @end defvr
 
 @deftypefun int des_set_key (struct des_ctx *@var{ctx}, const uint8_t *@var{key})
@@ -1470,11 +1455,11 @@ triple-DES, it is defined in the same place as plain DES,
 @end deftp
 
 @defvr Constant DES3_BLOCK_SIZE
-The DES3 block-size is the same as DES_BLOCK_SIZE, 8.
+The DES3 block-size is the same as DES_BLOCK_SIZE, 8
 @end defvr
 
 @defvr Constant DES3_KEY_SIZE
-DES key size, 24.
+DES key size, 24
 @end defvr
 
 @deftypefun int des3_set_key (struct des3_ctx *@var{ctx}, const uint8_t *@var{key})
@@ -1567,18 +1552,7 @@ Encrypts or decrypts the data of a message, using salsa20. When a
 message is encrypted using a sequence of calls to @code{salsa20_crypt},
 all but the last call @emph{must} use a length that is a multiple of
 @code{SALSA20_BLOCK_SIZE}.
-@end deftypefun
 
-The full salsa20 cipher uses 20 rounds of mixing. Variants of Salsa20
-with fewer rounds are possible, and the 12-round variant is specified by
-eSTREAM, see @url{http://www.ecrypt.eu.org/stream/finallist.html}.
-Nettle calls this variant @code{salsa20r12}. It uses the same context
-struct and key setup as the full salsa20 cipher, but a separate function
-for encryption and decryption.
-
-@deftypefun void salsa20r12_crypt (struct salsa20_ctx *@var{ctx}, unsigned @var{length}, uint8_t *@var{dst}, const uint8_t *@var{src})
-Encrypts or decrypts the data of a message, using salsa20 reduced to 12
-rounds.
 @end deftypefun
 
 @subsection SERPENT
@@ -1592,19 +1566,19 @@ larger ones. Nettle defines SERPENT in @file{<nettle/serpent.h>}.
 @end deftp
 
 @defvr Constant SERPENT_BLOCK_SIZE
-The SERPENT block-size, 16.
+The SERPENT block-size, 16
 @end defvr
 
 @defvr Constant SERPENT_MIN_KEY_SIZE
-Minimum SERPENT key size, 16.
+Minimum SERPENT key size, 16
 @end defvr
 
 @defvr Constant SERPENT_MAX_KEY_SIZE
-Maximum SERPENT key size, 32.
+Maximum SERPENT key size, 32
 @end defvr
 
 @defvr Constant SERPENT_KEY_SIZE
-Default SERPENT key size, 32.
+Default SERPENT key size, 32
 @end defvr
 
 @deftypefun void serpent_set_key (struct serpent_ctx *@var{ctx}, unsigned @var{length}, const uint8_t *@var{key})
@@ -1632,19 +1606,19 @@ Nettle defines it in @file{<nettle/twofish.h>}.
 @end deftp
 
 @defvr Constant TWOFISH_BLOCK_SIZE
-The TWOFISH block-size, 16.
+The TWOFISH block-size, 16
 @end defvr
 
 @defvr Constant TWOFISH_MIN_KEY_SIZE
-Minimum TWOFISH key size, 16.
+Minimum TWOFISH key size, 16
 @end defvr
 
 @defvr Constant TWOFISH_MAX_KEY_SIZE
-Maximum TWOFISH key size, 32.
+Maximum TWOFISH key size, 32
 @end defvr
 
 @defvr Constant TWOFISH_KEY_SIZE
-Default TWOFISH key size, 32.
+Default TWOFISH key size, 32
 @end defvr
 
 @deftypefun void twofish_set_key (struct twofish_ctx *@var{ctx}, unsigned @var{length}, const uint8_t *@var{key})
@@ -1955,7 +1929,7 @@ underlying cipher. These interfaces are defined in @file{<nettle/gcm.h>}
 @subsubsection General @acronym{GCM} interface
 
 @deftp {Context struct} {struct gcm_key}
-Message independent hash sub-key, and related tables.
+Message independent hash subkey, and related tables.
 @end deftp
 
 @deftp {Context struct} {struct gcm_ctx}
@@ -2020,7 +1994,7 @@ The following macros are defined.
 
 @deffn Macro GCM_CTX (@var{context_type})
 This defines an all-in-one context struct, including the context of the
-underlying cipher, the hash sub-key, and the per-message state. It expands
+underlying cipher, the hash subkey, and the per-message state. It expands
 to
 @example
 @{
@@ -2144,7 +2118,6 @@ Keyed hash functions are typically a lot faster than digital signatures
 as well.
 
 @subsection @acronym{HMAC}
-@cindex HMAC
 
 One can build keyed hash functions from ordinary hash functions. Older
 constructions simply concatenate secret key and message and hashes that, but
@@ -2358,119 +2331,6 @@ This function also resets the context for processing new messages, with
 the same key.
 @end deftypefun
 
-@subsection @acronym{UMAC}
-@cindex UMAC
-
-@acronym{UMAC} is a message authentication code based on universal
-hashing, and designed for high performance on modern processors (in
-contrast to GCM, @xref{GCM}, which is designed primarily for hardware
-performance). On processors with good integer multiplication
-performance, it can be 10 times faster than SHA256 and SHA512.
-@acronym{UMAC} is specified in @cite{RFC 4418}.
-
-The secret key is always 128 bits (16 octets). The key is used as an
-encryption key for the @acronym{AES} block cipher. This cipher is used
-in counter mode to generate various internal subkeys needed in
-@acronym{UMAC}. Messages are of arbitrary size, and for each message,
-@acronym{UMAC} also needs a unique nonce. Nonce values must not be
-reused for two messages with the same key, but they need not be kept
-secret.
-
-The nonce must be at least one octet, and at most 16; nonces shorter
-than 16 octets are zero-padded. Nettle's implementation of
-@acronym{UMAC} increments the nonce for automatically each message, so
-explicitly setting the nonce for each message is optional. This
-auto-increment uses network byte order and it takes the length of the
-nonce into acount. E.g., if the initial nonce is ``abc'' (3 octets),
-this value is zero-padded to 16 octets for the first message. For the
-next message, the nonce is incremented to ``abd'', and this incremented
-value is zero-padded to 16 octets.
-
-@acronym{UMAC} is defined in four variants, for different output sizes:
-32 bits (4 octest), 64 bits (8 octets), 96 bits (12 octets) and 128 bits
-(16 octets), corresponding to different tradeoffs between speed and
-security. Using a shorter output size sometimes (but not always!) gives
-the same result as using a longer output size and truncating the result.
-So it is important to use the right variant. For consistency with other
-hash and @acronym{MAC} functions, Nettle's @code{_digest} functions for
-@acronym{UMAC} accept a length parameter so that the output can be
-truncated to any desired size, but it is recommended to stick to the
-specified output size and select the @acronym{umac} variant
-corresponding to the desired size.
-
-The internal block size of @acronym{UMAC} is 1024 octets, and it also
-generates more than 1024 bytes of subkeys. This makes the size of the
-context struct a bit larger than other hash functions and @acronym{MAC}
-algorithms in Nettle.
-
-Nettle defines @acronym{UMAC} in @file{<nettle/umac.h>}.
-
-@deftp {Context struct} {struct umac32_ctx}
-@deftpx {Context struct} {struct umac64_ctx}
-@deftpx {Context struct} {struct umac96_ctx}
-@deftpx {Context struct} {struct umac128_ctx}
-Each @acronym{UMAC} variant uses its own context struct.
-@end deftp
-
-@defvr Constant UMAC_KEY_SIZE
-The UMAC key size, 16.
-@end defvr
-@defvr Constant UMAC32_DIGEST_SIZE
-The size of an UMAC32 digest, 4.
-@end defvr
-@defvr Constant UMAC64_DIGEST_SIZE
-The size of an UMAC64 digest, 8.
-@end defvr
-@defvr Constant UMAC96_DIGEST_SIZE
-The size of an UMAC96 digest, 12.
-@end defvr
-@defvr Constant UMAC128_DIGEST_SIZE
-The size of an UMAC128 digest, 16.
-@end defvr
-@defvr Constant UMAC128_DATA_SIZE
-The internal block size of UMAC.
-@end defvr
-
-@deftypefun void umac32_set_key (struct umac32_ctx *@var{ctx}, const uint8_t *@var{key})
-@deftypefunx void umac64_set_key (struct umac64_ctx *@var{ctx}, const uint8_t *@var{key})
-@deftypefunx void umac96_set_key (struct umac96_ctx *@var{ctx}, const uint8_t *@var{key})
-@deftypefunx void umac128_set_key (struct umac128_ctx *@var{ctx}, const uint8_t *@var{key})
-These functions initialize the @acronym{UMAC} context struct. They also
-initialize the nonce to zero (with length 16, for auto-increment).
-@end deftypefun
-
-@deftypefun void umac32_set_nonce (struct umac32_ctx *@var{ctx}, unsigned @var{length}, const uint8_t *@var{nonce})
-@deftypefunx void umac64_set_nonce (struct umac64_ctx *@var{ctx}, unsigned @var{length}, const uint8_t *@var{nonce})
-@deftypefunx void umac96_set_nonce (struct umac96_ctx *@var{ctx}, unsigned @var{length}, const uint8_t *@var{nonce})
-@deftypefunx void umac128_set_nonce (struct umac128_ctx *@var{ctx}, unsigned @var{length}, const uint8_t *@var{nonce})
-Sets the nonce to be used for the next message. In general, nonces
-should be set before processing of the message. This is not strictly
-required for @acronym{UMAC} (the nonce only affects the final processing
-generating the digest), but it is nevertheless recommended that this
-function is called @emph{before} the first @code{_update} call for the
-message.
-@end deftypefun
-
-@deftypefun void umac32_update (struct umac32_ctx *@var{ctx}, unsigned @var{length}, const uint8_t *@var{data})
-@deftypefunx void umac64_update (struct umac64_ctx *@var{ctx}, unsigned @var{length}, const uint8_t *@var{data})
-@deftypefunx void umac96_update (struct umac96_ctx *@var{ctx}, unsigned @var{length}, const uint8_t *@var{data})
-@deftypefunx void umac128_update (struct umac128_ctx *@var{ctx}, unsigned @var{length}, const uint8_t *@var{data})
-These functions are called zero or more times to process the message.
-@end deftypefun
-
-@deftypefun void umac32_digest (struct umac32_ctx *@var{ctx}, unsigned @var{length}, uint8_t *@var{digest})
-@deftypefunx void umac64_digest (struct umac64_ctx *@var{ctx}, unsigned @var{length}, uint8_t *@var{digest})
-@deftypefunx void umac96_digest (struct umac96_ctx *@var{ctx}, unsigned @var{length}, uint8_t *@var{digest})
-@deftypefunx void umac128_digest (struct umac128_ctx *@var{ctx}, unsigned @var{length}, uint8_t *@var{digest})
-Extracts the @acronym{MAC} of the message, writing it to @var{digest}.
-@var{length} is usually equal to the specified output size, but if you
-provide a smaller value, only the first @var{length} octets of the
-@acronym{MAC} are written. These functions reset the context for
-processing of a new message with the same key. The nonce is incremented
-as described above, the new value is used unless you call the
-@code{_set_nonce} function explicitly for each message.
-@end deftypefun
-
 @node Key derivation functions, Public-key algorithms, Keyed hash functions, Reference
 @comment  node-name,  next,  previous,  up
 @section Key derivation Functions
@@ -2490,7 +2350,7 @@ attacks by using salting and expensive computation.
 
 @subsection @acronym{PBKDF2}
 The most well known PBKDF is the @code{PKCS #5 PBKDF2} described in
-@cite{RFC 2898} which uses a pseudo-random function such as
+@cite{RFC 2898} which uses a pseudorandom function such as
 @acronym{HMAC-SHA1}.
 
 Nettle's @acronym{PBKDF2} functions are defined in
@@ -2628,7 +2488,6 @@ key, and to no others''.
 @menu
 * RSA::                         The RSA public key algorithm.
 * DSA::                         The DSA digital signature algorithm.
-* Elliptic curves::             Elliptic curves and ECDSA
 @end menu
 
 @node RSA, DSA, Public-key algorithms, Public-key algorithms
@@ -2648,14 +2507,14 @@ It's remarkably simple to describe the trapdoor function behind
 F(x) = x^e mod n
 @end example
 
-I.e. raise x to the @code{e}'th power, while discarding all multiples of
+I.e. raise x to the @code{e}:th power, while discarding all multiples of
 @code{n}. The pair of numbers @code{n} and @code{e} is the public key.
 @code{e} can be quite small, even @code{e = 3} has been used, although
 slightly larger numbers are recommended. @code{n} should be about 1000
 bits or larger.
 
 If @code{n} is large enough, and properly chosen, the inverse of F,
-the computation of @code{e}'th roots modulo @code{n}, is very difficult.
+the computation of @code{e}:th roots modulo @code{n}, is very difficult.
 But, where's the trapdoor?
 
 Let's first look at how @acronym{RSA} key-pairs are generated. First
@@ -2844,7 +2703,7 @@ example if if @var{n_size} is too small, or if @var{e_size} is zero and
 @code{pub->e} is an even number.
 @end deftypefun
 
-@node DSA, Elliptic curves, RSA, Public-key algorithms
+@node DSA,  , RSA, Public-key algorithms
 @comment  node-name,  next,  previous,  up
 @subsection @acronym{DSA}
 
@@ -2853,11 +2712,11 @@ The @acronym{DSA} digital signature algorithm is more complex than
 published @acronym{FIPS} 186 which is the authoritative specification.
 Sometimes @acronym{DSA} is referred to using the acronym @acronym{DSS},
 for Digital Signature Standard. The most recent revision of the
-specification, FIPS186-3, was issued in 2009, and it adds support for
+specification, FIPS186-3, was issueed in 2009, and it adds support for
 larger hash functions than @acronym{sha1}.
 
 For @acronym{DSA}, the underlying mathematical problem is the
-computation of discrete logarithms. The public key consists of a large
+computation of discreet logarithms. The public key consists of a large
 prime @code{p}, a small prime @code{q} which is a factor of @code{p-1},
 a number @code{g} which generates a subgroup of order @code{q} modulo
 @code{p}, and an element @code{y} in that subgroup.
@@ -2900,7 +2759,7 @@ difficult group structure. One good algorithm is Pollard-rho, which has
 complexity @code{sqrt(q)}.
 
 The important point is that security depends on the size of @emph{both}
-@code{p} and @code{q}, and they should be chosen so that the difficulty
+@code{p} and @code{q}, and they should be choosen so that the difficulty
 of both discrete logarithm methods are comparable. Today, the security
 margin of the original @acronym{DSA} may be uncomfortably small. Using a
 @code{p} of 1024 bits implies that cracking using the number field sieve
@@ -3078,7 +2937,7 @@ to @code{p_bits = 1024}. Non-standard sizes are possible, in particular
 can not in general be expected to support such keys. Also note that
 using very large @var{p_bits}, with @var{q_bits} fixed at 160, doesn't
 make much sense, because the security is also limited by the size of the
-smaller prime. Using a larger @code{q_bits} requires switching to a
+smaller prime. Using a larger @code{q_bits} requires switchign to a
 larger hash function. To generate @acronym{DSA} keys for use with
 @acronym{SHA256}, use @code{q_bits = 256} and, e.g., @code{p_bits =
 2048}.
@@ -3088,159 +2947,7 @@ Returns one on success, and zero on failure. The function will fail if
 small.
 @end deftypefun
 
-@node Elliptic curves,, DSA, Public-key algorithms
-@comment  node-name,  next,  previous,  up
-@subsection @acronym{Elliptic curves}
-
-For cryptographic purposes, an elliptic curve is a mathematical group of
-points, and computing logarithms in this group is computationally
-difficult problem. Nettle uses additive notation for elliptic curve
-groups. If @math{P} and @math{Q} are two points, and @math{k} is an
-integer, the point sum, @math{P + Q}, and the multiple @math{k P} can be
-computed efficiently, but given only two points @math{P} and @math{Q},
-finding an integer @math{k} such that @math{Q = k P} is the elliptic
-curve discrete logarithm problem.
-
-Nettle supports standard curves which are all of the form @math{y^2 =
-x^3 - 3 x + b @pmod{p}}, i.e., the points have coordinates @math{(x,y)},
-both considered as integers modulo a specified prime @math{p}. Curves
-are represented as a @code{struct ecc_curve}. Supported curves are
-declared in @file{<nettle/ecc-curve.h>}, e.g., @code{nettle_secp_256r1}
-for a standardized curve using the 256-bit prime @math{p = 2^{256} -
-2^{224} + 2^{192} + 2^{96} - 1}. The contents of these structs is not
-visible to nettle users. The ``bitsize of the curve'' is used as a
-shorthand for the bitsize of the curve's prime @math{p}, e.g., 256 bits
-for @code{nettle_secp_256r1}.
-
-@subsubsection Side-channel silence
-Nettle's implementation of the elliptic curve operations is intended to
-be side-channel silent. The side-channel attacks considered are:
-
-@itemize
-@item Timing attacks
-If the timing of operations depends on secret values, an attacker
-interacting with your system can measure the response time, and infer
-information about your secrets, e.g., a private signature key.
-
-@item Attacks using memory caches
-Assume you have some secret data on a multi-user system, and that this
-data is properly protected so that other users get no direct access to
-it. If you have a process operating on the secret data, and this process
-does memory accesses depending on the data, e.g, an internal lookup
-table in some cryptographic algorithm, an attacker running a separate
-process on the same system may use behavior of internal CPU caches to
-get information about your secrets.
-@end itemize
-
-Nettle's ECC implementation is designed to be @dfn{side-channel silent},
-and not leak any information to these attacks. Timing and memory
-accesses depend only on the size of the input data and its location in
-memory, not on the actual data bits. This implies a performance penalty
-in several of the building blocks.
-
-@subsection ECDSA
-
-ECDSA is a variant of the DSA digital signature scheme (@pxref{DSA}),
-which works over an elliptic curve group rather than over a (subgroup
-of) integers modulo @math{p}. Like DSA, creating a signature requires a unique
-random nonce (repeating the nonce with two different messages reveals
-the private key, and any leak or bias in the generation of the nonce
-also leaks information about the key).
-
-Unlike DSA, signatures are in general not tied to any particular hash
-function or even hash size. Any hash function can be used, and the hash
-value is truncated or padded as needed to get a size matching the curve
-being used. It is recommended to use a strong cryptographic hash
-function with digest size close to the bit size of the curve, e.g.,
-SHA256 is a reasonable choice when using ECDSA signature over the curve
-secp256r1. A protocol or application using ECDSA has to specify which
-curve and which hash function to use, or provide some mechanism for
-negotiating.
-
-Nettle defines ECDSA in @file{<nettle/ecdsa.h>}. We first need
-to define the data types used to represent public and private keys.
-
-@deftp {struct} {struct ecc_point}
-Represents a point on an elliptic curve. In particular, it is used to
-represent an ECDSA public key.
-@end deftp
-
-@deftypefun void ecc_point_init (struct ecc_point *@var{p}, const structecc_curve *@var{ecc})
-Initializes @var{p} to represent points on the given curve @var{ecc}.
-Allocates storage for the coordinates, using the same allocation
-functions as GMP.
-@end deftypefun
-
-@deftypefun void ecc_point_clear (struct ecc_point *@var{p})
-Deallocate storage.
-@end deftypefun
-
-@deftypefun int ecc_point_set (struct ecc_point *@var{p}, const mpz_t @var{x}, const mpz_t @var{y})
-Check that the given coordinates represent a point on the curve. If so,
-the coordinates are copied and converted to internal representation, and
-the function returns 1. Otherwise, it returns 0. Currently, the
-infinity point (or zero point, with additive notation) i snot allowed.
-@end deftypefun
-
-@deftypefun void ecc_point_get (const struct ecc_point *@var{p}, mpz_t @var{x}, mpz_t @var{y})
-Extracts the coordinate of the point @var{p}. The output parameters
-@var{x} or @var{y} may be NULL if the caller doesn't want that
-coordinate.
-@end deftypefun
-
-@deftp {struct} {struct ecc_scalar}
-Represents an integer in the range @math{0 < x < group order}, where the
-``group order'' refers to the order of an ECC group. In particular, it
-is used to represent an ECDSA private key.
-@end deftp
-
-@deftypefun void ecc_scalar_init (struct ecc_scalar *@var{s}, const struct ecc_curve *@var{ecc})
-Initializes @var{s} to represent a scalar suitable for the given curve
-@var{ecc}. Allocates storage using the same allocation functions as GMP.
-@end deftypefun
-
-@deftypefun void ecc_scalar_clear (struct ecc_scalar *@var{s})
-Deallocate storage.
-@end deftypefun
-
-@deftypefun int ecc_scalar_set (struct ecc_scalar *@var{s}, const mpz_t @var{z})
-Check that @var{z} is in the correct range. If so, copies the value to
-@var{s} and returns 1, otherwise returns 0.
-@end deftypefun
-
-@deftypefun void ecc_scalar_get (const struct ecc_scalar *@var{s}, mpz_t @var{z})
-Extracts the scalar, in GMP @code{mpz_t} representation.
-@end deftypefun
-
-To create and verify ECDSA signatures, the following functions are used.
-
-@deftypefun void ecdsa_sign (const struct ecc_scalar *@var{key}, void *@var{random_ctx}, nettle_random_func *@var{random}, unsigned @var{digest_length}, const uint8_t *@var{digest}, struct dsa_signature *@var{signature})
-Uses the private key @var{key} to create a signature on @var{digest}.
-@var{random_ctx} and @var{random} is a randomness generator.
-@code{random(random_ctx, length, dst)} should generate @code{length}
-random octets and store them at @code{dst}. The signature is stored in
-@var{signature}, in the same was as for plain DSA.
-@end deftypefun
-
-@deftypefun int ecdsa_verify (const struct ecc_point *@var{pub}, unsigned @var{length}, const uint8_t *@var{digest}, const struct dsa_signature *@var{signature})
-Uses the public key @var{pub} to verify that @var{signature} is a valid
-signature for the message digest @var{digest} (of @var{length} octets).
-Returns 1 if the signature is valid, otherwise 0.
-@end deftypefun
-
-Finally, to generation of new an ECDSA key pairs
-
-@deftypefun void ecdsa_generate_keypair (struct ecc_point *@var{pub}, struct ecc_scalar *@var{key}, void *@var{random_ctx}, nettle_random_func *@var{random});
-@var{pub} and @var{key} is where the resulting key pair is stored. The
-structs should be initialized, for the desired ECC curve, before you call this function.
-
-@var{random_ctx} and @var{random} is a randomness generator.
-@code{random(random_ctx, length, dst)} should generate @code{length}
-random octets and store them at @code{dst}. For advice, see
-@xref{Randomness}.
-@end deftypefun
-
-@node Randomness, ASCII encoding, Public-key algorithms, Reference
+@node Randomness, Ascii encoding, Public-key algorithms, Reference
 @comment  node-name,  next,  previous,  up
 @section Randomness
 
@@ -3477,7 +3184,7 @@ Information about a single source.
 @end deftp
 
 @defvr Constant YARROW256_SEED_FILE_SIZE
-Recommended size of the Yarrow-256 seed file.
+Recommanded size of the Yarrow-256 seed file.
 @end defvr
 
 @deftypefun void yarrow256_init (struct yarrow256_ctx *@var{ctx}, unsigned @var{nsources}, struct yarrow_source *@var{sources})
@@ -3561,9 +3268,9 @@ Returns an entropy estimate, in bits, suitable for calling
 @code{yarrow256_update}. Usually, 0, 1 or 2 bits.
 @end deftypefun
 
-@node ASCII encoding, Miscellaneous functions, Randomness, Reference
+@node Ascii encoding, Miscellaneous functions, Randomness, Reference
 @comment  node-name,  next,  previous,  up
-@section ASCII encoding
+@section Ascii encoding
 
 Encryption will transform your data from text into binary format, and that
 may be a problem if you want, for example, to send the data as if it was
@@ -3713,7 +3420,7 @@ hexadecimal digits have been seen). Returns 1 on success, and 0 on
 error.
 @end deftypefun
 
-@node Miscellaneous functions, Compatibility functions, ASCII encoding, Reference
+@node Miscellaneous functions, Compatibility functions, Ascii encoding, Reference
 @comment  node-name,  next,  previous,  up
 @section Miscellaneous functions
 
@@ -3874,11 +3581,4 @@ End:
 @c  LocalWords:  DSA gmp FIPS DSS libdes OpenSSL ARCTWO Josefsson Nikos Andreas
 @c  LocalWords:  Mavroyanopoulos Sigfridsson Comstedt interoperability Sparc IC
 @c  LocalWords:  DES FIXME Rivest's plaintext ciphertext CTR XORed timestamp
-@c  LocalWords:  XORs cryptologists libnettle libhogweed GCM ECDSA NTT
-@c  LocalWords:  toolkits BLOWFISH Möller RIPEMD libgcrypt PBKDF Shishi
-@c  LocalWords:  GnuTLS Gutmann's GOSTHASH GOST Aleksey Kravchenko ECC
-@c  LocalWords:  rhash Mavrogiannopoulos Keccak Bertoni
-@c  LocalWords:  Michaël Peeters Assche Dobbertin Antoon Bosselaers KDF
-@c  LocalWords:  Preneel rôle McGrew Viega KDFs PBKDFs passphrase PRF
-@c  LocalWords:  th deallocate pre bitsize multi lookup secp startup
-@c  LocalWords:  typedef typedef
+@c  LocalWords:  XORs cryptologists

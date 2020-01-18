@@ -2,7 +2,7 @@ dnl -*- mode: shell-script; sh-indentation: 2; -*-
 
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([nettle], [2.7.1], [nettle-bugs@lists.lysator.liu.se])
+AC_INIT([nettle], [2.6], [nettle-bugs@lists.lysator.liu.se])
 AC_PREREQ(2.61)
 AC_CONFIG_SRCDIR([arcfour.c])
 # Needed to stop autoconf from looking for files in parent directories.
@@ -11,10 +11,10 @@ AC_CONFIG_AUX_DIR([.])
 AC_CONFIG_HEADER([config.h])
 
 LIBNETTLE_MAJOR=4
-LIBNETTLE_MINOR=7
+LIBNETTLE_MINOR=5
 
 LIBHOGWEED_MAJOR=2
-LIBHOGWEED_MINOR=5
+LIBHOGWEED_MINOR=3
 
 AC_CANONICAL_HOST
 
@@ -68,10 +68,6 @@ AC_ARG_ENABLE(documentation,
   AC_HELP_STRING([--disable-documentation], [Omit building and installing the documentation. (default=auto)]),,
   [enable_documentation=auto])
 
-AC_ARG_ENABLE(arm-neon,
-  AC_HELP_STRING([--enable-arm-neon], [Enable ARM Neon assembly. (default=auto)]),,
-  [enable_arm_neon=auto])
-
 LSH_RPATH_INIT([`echo $with_lib_path | sed 's/:/ /g'` \
     `echo $exec_prefix | sed "s@^NONE@$prefix/lib@g" | sed "s@^NONE@$ac_default_prefix/lib@g"` \
     /usr/local/lib /sw/local/lib /sw/lib \
@@ -121,10 +117,6 @@ AC_PROG_INSTALL
 AC_PROG_MKDIR_P
 
 AC_PROG_LN_S
-
-# Compiler tests for the build system
-GMP_PROG_CC_FOR_BUILD
-GMP_PROG_EXEEXT_FOR_BUILD
 
 LSH_DEPENDENCY_TRACKING
 
@@ -237,114 +229,36 @@ if test "x$enable_assembler" = xyes ; then
 	asm_path=sparc32
       fi
       ;;
-    armv6* | armv7*)
-      NETTLE_CHECK_ARM_NEON
-
-      asm_path="arm/v6 arm"
-      
-      if test "x$enable_arm_neon" = xyes ; then
-	asm_path="arm/neon $asm_path"
-      fi
-      ;;
-    arm*)
-      asm_path=arm
-      ;;
     *)
       enable_assembler=no
       ;;
   esac
 fi
-
-# Files which replace a C source file (or otherwise don't correspond
-# to a new object file).
-asm_replace_list="aes-encrypt-internal.asm aes-decrypt-internal.asm \
-		arcfour-crypt.asm camellia-crypt-internal.asm \
-		md5-compress.asm memxor.asm \
-		salsa20-crypt.asm salsa20-core-internal.asm \
-		serpent-encrypt.asm serpent-decrypt.asm \
-		sha1-compress.asm sha256-compress.asm sha512-compress.asm \
-		sha3-permute.asm umac-nh.asm umac-nh-n.asm machine.m4"
-
-# Assembler files which generate additional object files if they are used.
-asm_optional_list=""
-
-if test "x$enable_public_key" = "xyes" ; then
-  asm_optional_list="ecc-192-modp.asm ecc-224-modp.asm ecc-256-redc.asm \
-      ecc-384-modp.asm ecc-521-modp.asm"
-fi
-
-OPT_ASM_SOURCES=""
-
-asm_file_list=""
+# echo "enable_assembler: $enable_assembler, asm_path: $asm_path"
 
 if test "x$enable_assembler" = xyes ; then
   if test -n "$asm_path"; then
-    AC_MSG_NOTICE([Looking for assembler files in $asm_path.])
-    for tmp_f in $asm_replace_list ; do
-      for asm_dir in $asm_path ; do
-        if test -f "$srcdir/$asm_dir/$tmp_f"; then
-	  asm_file_list="$asm_file_list $tmp_f"
-          AC_CONFIG_LINKS($tmp_f:$asm_dir/$tmp_f)
-	  break
-        fi
-      done
+    AC_MSG_NOTICE([Looking for assembler files in $asm_path/.])
+    found=no
+    for tmp_f in aes-encrypt-internal.asm aes-decrypt-internal.asm \
+		 arcfour-crypt.asm camellia-crypt-internal.asm \
+		 md5-compress.asm memxor.asm \
+		 salsa20-crypt.asm salsa20-core-internal.asm \
+		 serpent-encrypt.asm serpent-decrypt.asm \
+		 sha1-compress.asm machine.m4; do
+#       echo "Looking for $srcdir/$asm_path/$tmp_f"
+      if test -f "$srcdir/$asm_path/$tmp_f"; then
+#        echo found
+        found=yes
+        AC_CONFIG_LINKS($tmp_f:$asm_path/$tmp_f)
+      fi
     done
-    dnl Workaround for AC_CONFIG_LINKS, which complains if we use the
-    dnl same destination argument $tmp_f multiple times.
-    for tmp_o in $asm_optional_list ; do
-      for asm_dir in $asm_path ; do
-	if test -f "$srcdir/$asm_dir/$tmp_o"; then
-	  asm_file_list="$asm_file_list $tmp_o"
-	  AC_CONFIG_LINKS($tmp_o:$asm_dir/$tmp_o)
-	  while read tmp_func ; do
-	    AC_DEFINE_UNQUOTED(HAVE_NATIVE_$tmp_func)
-	    eval HAVE_NATIVE_$tmp_func=yes
-	  done <<EOF
-[`sed -n 's/[^ 	]*PROLOGUE(_*\(nettle_\)*\([^)]*\)).*$/\2/p' < "$srcdir/$asm_dir/$tmp_o"`]
-EOF
-	  OPT_ASM_SOURCES="$OPT_ASM_SOURCES $tmp_o"
-	  break
-	fi
-      done
-    done	
-    if test -z "$asm_file_list"; then
+    if test "$found" = no; then
       enable_assembler=no
       AC_MSG_WARN([No assembler files found.])
     fi
   fi
 fi
-
-AC_SUBST([OPT_ASM_SOURCES])
-
-AH_VERBATIM([HAVE_NATIVE],
-[/* Define to 1 each of the following for which a native (ie. CPU specific)
-    implementation of the corresponding routine exists.  */
-#undef HAVE_NATIVE_ecc_192_modp
-#undef HAVE_NATIVE_ecc_192_redc
-#undef HAVE_NATIVE_ecc_224_modp
-#undef HAVE_NATIVE_ecc_224_redc
-#undef HAVE_NATIVE_ecc_256_modp
-#undef HAVE_NATIVE_ecc_256_redc
-#undef HAVE_NATIVE_ecc_384_modp
-#undef HAVE_NATIVE_ecc_384_redc
-#undef HAVE_NATIVE_ecc_521_modp
-#undef HAVE_NATIVE_ecc_521_redc])
-
-# Besides getting correct dependencies, the explicit rules also tell
-# make that the .s files "ought to exist", so they are preferred over
-# .c files.
-AC_CONFIG_COMMANDS([asm.d],
-    [ for f in $asm_file_list
-      do
-        case $f in
-	  *.asm)
-	    echo "`basename $f .asm`.s : $f "'$(srcdir)/asm.m4 machine.m4 config.m4'
-	    ;;
-	esac
-      done > asm.d
-    ],
-    [ asm_file_list="$asm_file_list" ]
-)
 
 LSH_CCPIC
 
@@ -456,9 +370,7 @@ AC_SUBST([CCPIC_MAYBE])
 
 ASM_SYMBOL_PREFIX=''
 ASM_ELF_STYLE='no'
-# GNU as default is to use @
-ASM_TYPE_FUNCTION='@function'
-ASM_TYPE_PROGBITS='@progbits'
+ASM_TYPE_FUNCTION=''
 ASM_MARK_NOEXEC_STACK=''
 ASM_ALIGN_LOG=''
 
@@ -480,6 +392,29 @@ if test x$enable_assembler = xyes ; then
       [AC_MSG_WARN([test program with a single global could not be compiled!?])])])
   if test x$nettle_cv_asm_underscore = xyes ; then
     ASM_SYMBOL_PREFIX='_'
+  fi
+
+  AC_CACHE_CHECK([if we should use a .note.GNU-stack section],
+  nettle_cv_asm_gnu_stack,
+  [ # Default
+    nettle_cv_asm_gnu_stack=no
+
+    cat >conftest.c <<EOF
+int foo() { return 0; }
+EOF
+    nettle_compile="$CC $CFLAGS $CPPFLAGS -c conftest.c >conftest.out 2>&1"
+    if AC_TRY_EVAL(nettle_compile); then
+      cat conftest.out >&AC_FD_CC
+      $OBJDUMP -x conftest.o | grep '\.note\.GNU-stack' > /dev/null \
+      && nettle_cv_asm_gnu_stack=yes
+    else
+      cat conftest.out >&AC_FD_CC
+      echo "configure: failed program was:" >&AC_FD_CC
+      cat conftest.s >&AC_FD_CC
+    fi
+    rm -f conftest.*])
+  if test x$nettle_cv_asm_gnu_stack = xyes ; then
+    ASM_MARK_NOEXEC_STACK='.section .note.GNU-stack,"",@progbits'
   fi
 
   AC_CACHE_CHECK([for ELF-style .type,%function pseudo-ops],
@@ -514,38 +449,12 @@ foo:
   if test x$nettle_cv_asm_type_percent_function = xyes ; then
     ASM_ELF_STYLE='yes'
     ASM_TYPE_FUNCTION='%function'
-    ASM_TYPE_PROGBITS='%progbits'
   else
     if test x$nettle_cv_asm_type_hash_function = xyes ; then
       ASM_ELF_STYLE='yes'
       ASM_TYPE_FUNCTION='#function'
-      ASM_TYPE_PROGBITS='#progbits'
     fi
   fi
-
-  AC_CACHE_CHECK([if we should use a .note.GNU-stack section],
-  nettle_cv_asm_gnu_stack,
-  [ # Default
-    nettle_cv_asm_gnu_stack=no
-
-    cat >conftest.c <<EOF
-int foo() { return 0; }
-EOF
-    nettle_compile="$CC $CFLAGS $CPPFLAGS -c conftest.c >conftest.out 2>&1"
-    if AC_TRY_EVAL(nettle_compile); then
-      cat conftest.out >&AC_FD_CC
-      $OBJDUMP -x conftest.o | grep '\.note\.GNU-stack' > /dev/null \
-      && nettle_cv_asm_gnu_stack=yes
-    else
-      cat conftest.out >&AC_FD_CC
-      echo "configure: failed program was:" >&AC_FD_CC
-      cat conftest.s >&AC_FD_CC
-    fi
-    rm -f conftest.*])
-  if test x$nettle_cv_asm_gnu_stack = xyes ; then
-    ASM_MARK_NOEXEC_STACK='.section .note.GNU-stack,"",TYPE_PROGBITS'
-  fi
-
   AC_CACHE_CHECK([if .align assembly directive is logarithmic],
     [nettle_cv_asm_align_log],
     [GMP_TRY_ASSEMBLE([
@@ -553,13 +462,14 @@ EOF
 ],
        [nettle_cv_asm_align_log=yes],
        [nettle_cv_asm_align_log=no])])
-  ASM_ALIGN_LOG="$nettle_cv_asm_align_log"
+  if test x$nettle_cv_asm_align_log = xyes ; then
+    ASM_ALIGN_LOG='yes'
+  fi
 fi
 
 AC_SUBST(ASM_SYMBOL_PREFIX)
 AC_SUBST(ASM_ELF_STYLE)
 AC_SUBST(ASM_TYPE_FUNCTION)
-AC_SUBST(ASM_TYPE_PROGBITS)
 AC_SUBST(ASM_MARK_NOEXEC_STACK)
 AC_SUBST(ASM_ALIGN_LOG)
 AC_SUBST(W64_ABI)
@@ -653,20 +563,6 @@ Support for public key algorithms will be unavailable.])]
 
 # Add -R flags needed to run programs linked with gmp
 LSH_RPATH_FIX
-
-# Check for gmp limb size
-nettle_cv_gmp_numb_bits=0
-if test "$enable_public_key" = yes; then
-  AC_MSG_CHECKING([for GMP limb size])
-  AC_COMPUTE_INT(nettle_cv_gmp_numb_bits, [GMP_NUMB_BITS],
-      [#include <gmp.h>],
-      [AC_MSG_FAILURE([cannot find value of GMP_NUMB_BITS])])
-
-  AC_MSG_RESULT([$nettle_cv_gmp_numb_bits bits])
-fi
-
-GMP_NUMB_BITS="$nettle_cv_gmp_numb_bits"
-AC_SUBST([GMP_NUMB_BITS])
 
 AH_TEMPLATE([HAVE_MPZ_POWM_SEC], [Define if mpz_powm_sec is available (appeared in GMP-5)])
 AC_CHECK_FUNC(__gmpz_powm_sec, [AC_DEFINE(HAVE_MPZ_POWM_SEC)])

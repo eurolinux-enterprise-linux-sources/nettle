@@ -1,3 +1,4 @@
+C -*- mode: asm; asm-comment-char: ?C; -*-  
 C nettle, low-level cryptographics library
 C 
 C Copyright (C) 2001, 2002, 2005 Rafael R. Sevilla, Niels Möller
@@ -60,7 +61,7 @@ C %edi is a temporary, often used as an accumulator.
 	C	       unsigned length, uint8_t *dst,
 	C	       uint8_t *src)
 	.text
-	ALIGN(16)
+	ALIGN(4)
 PROLOGUE(_nettle_aes_encrypt)
 	C save all registers that need to be saved
 	pushl	%ebx		C  20(%esp)
@@ -93,7 +94,7 @@ PROLOGUE(_nettle_aes_encrypt)
 
 	addl	$16,KEY		C  point to next key
 	movl	KEY,FRAME_KEY
-	ALIGN(16)
+	ALIGN(4)
 .Lround_loop:
 	AES_ROUND(T, SA,SB,SC,SD, TMP, KEY)
 	movl	TMP, TA

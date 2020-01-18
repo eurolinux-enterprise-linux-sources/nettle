@@ -41,7 +41,7 @@
 
 #include "getopt.h"
 
-#define DEFAULT_KEYSIZE 2048
+#define KEYSIZE 900
 #define ESIZE 30
 
 static void
@@ -49,22 +49,6 @@ progress(void *ctx, int c)
 {
   (void) ctx;
   fputc(c, stderr);
-}
-
-static unsigned long
-uint_arg (char c, const char *arg)
-{
-  unsigned long val;
-  char *end;
-
-  val = strtoul(arg, &end, 0);
-  if (*arg == '\0' || *end != '\0')
-    {
-      werror ("Invalid integer argument for -%c option.\n", c);
-      exit (EXIT_FAILURE);
-    }
-
-  return val;      
 }
 
 int
@@ -82,9 +66,6 @@ main(int argc, char **argv)
   struct nettle_buffer pub_buffer;
   struct nettle_buffer priv_buffer;
 
-  unsigned long key_size = DEFAULT_KEYSIZE;
-  unsigned long key_e = 0;
-
   enum { OPT_HELP = 300 };
   static const struct option options[] =
     {
@@ -94,23 +75,15 @@ main(int argc, char **argv)
       { NULL, 0, NULL, 0}
     };
   
-  while ( (c = getopt_long(argc, argv, "o:r:e:s:", options, NULL)) != -1)
+  while ( (c = getopt_long(argc, argv, "o:r:", options, NULL)) != -1)
     switch (c)
-      {	
+      {
       case 'o':
 	priv_name = optarg;
 	break;
 
       case 'r':
 	random_name = optarg;
-	break;
-
-      case 's':
-	key_size = uint_arg ('s', optarg);
-	break;
-
-      case 'e':
-	key_e = uint_arg ('e', optarg);
 	break;
 
       case OPT_HELP:
@@ -146,14 +119,11 @@ main(int argc, char **argv)
   rsa_public_key_init(&pub);
   rsa_private_key_init(&priv);
 
-  if (key_e)
-    mpz_set_ui (pub.e, key_e);
-
   if (!rsa_generate_keypair
       (&pub, &priv,
        (void *) &yarrow, (nettle_random_func *) yarrow256_random,
        NULL, progress,
-       key_size, key_e == 0 ? ESIZE : 0))
+       KEYSIZE, ESIZE))
     {
       werror("Key generation failed.\n");
       return EXIT_FAILURE;

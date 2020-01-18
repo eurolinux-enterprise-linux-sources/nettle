@@ -38,8 +38,6 @@
 
 #include <time.h>
 
-#include "timing.h"
-
 #include "aes.h"
 #include "arcfour.h"
 #include "blowfish.h"
@@ -55,7 +53,6 @@
 #include "sha2.h"
 #include "sha3.h"
 #include "twofish.h"
-#include "umac.h"
 
 #include "nettle-meta.h"
 #include "nettle-internal.h"
@@ -114,6 +111,58 @@ die(const char *format, ...)
 }
 
 static double overhead = 0.0; 
+
+#if HAVE_CLOCK_GETTIME && defined CLOCK_PROCESS_CPUTIME_ID
+#define TRY_CLOCK_GETTIME 1
+struct timespec cgt_start;
+
+static int
+cgt_works_p(void)
+{
+  struct timespec now;
+  return clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &now) == 0;
+}
+
+static void
+cgt_time_start(void)
+{
+  if (clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &cgt_start) < 0)
+    die("clock_gettime failed: %s\n", strerror(errno));
+}
+
+static double
+cgt_time_end(void)
+{
+    struct timespec end;
+    if (clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end) < 0)
+      die("clock_gettime failed: %s\n", strerror(errno));
+
+    return end.tv_sec - cgt_start.tv_sec
+      + 1e-9 * (end.tv_nsec - cgt_start.tv_nsec);
+}
+
+static void (*time_start)(void);
+static double (*time_end)(void);
+
+#else /* !HAVE_CLOCK_GETTIME */
+#define TRY_CLOCK_GETTIME 0
+#define time_start clock_time_start
+#define time_end clock_time_end
+#endif /* !HAVE_CLOCK_GETTIME */
+
+static clock_t clock_start;
+
+static void
+clock_time_start(void)
+{
+  clock_start = clock();
+}
+
+static double
+clock_time_end(void)
+{
+  return (double) (clock() - (clock_start)) / CLOCKS_PER_SEC;
+}
 
 /* Returns second per function call */
 static double
@@ -351,51 +400,6 @@ time_hash(const struct nettle_hash *hash)
 	  time_function(bench_hash, &info));
 
   free(info.ctx);
-}
-
-static void
-time_umac(void)
-{
-  static uint8_t data[BENCH_BLOCK];
-  struct bench_hash_info info;
-  struct umac32_ctx ctx32;
-  struct umac64_ctx ctx64;
-  struct umac96_ctx ctx96;
-  struct umac128_ctx ctx128;
-  
-  uint8_t key[16];
-
-  umac32_set_key (&ctx32, key);
-  info.ctx = &ctx32;
-  info.update = (nettle_hash_update_func *) umac32_update;
-  info.data = data;
-
-  display("umac32", "update", UMAC_DATA_SIZE,
-	  time_function(bench_hash, &info));
-
-  umac64_set_key (&ctx64, key);
-  info.ctx = &ctx64;
-  info.update = (nettle_hash_update_func *) umac64_update;
-  info.data = data;
-
-  display("umac64", "update", UMAC_DATA_SIZE,
-	  time_function(bench_hash, &info));
-
-  umac96_set_key (&ctx96, key);
-  info.ctx = &ctx96;
-  info.update = (nettle_hash_update_func *) umac96_update;
-  info.data = data;
-
-  display("umac96", "update", UMAC_DATA_SIZE,
-	  time_function(bench_hash, &info));
-
-  umac128_set_key (&ctx128, key);
-  info.ctx = &ctx128;
-  info.update = (nettle_hash_update_func *) umac128_update;
-  info.data = data;
-
-  display("umac128", "update", UMAC_DATA_SIZE,
-	  time_function(bench_hash, &info));
 }
 
 static void
@@ -662,7 +666,7 @@ main(int argc, char **argv)
       &nettle_des3,
       &nettle_serpent256,
       &nettle_twofish128, &nettle_twofish192, &nettle_twofish256,
-      &nettle_salsa20, &nettle_salsa20r12,
+      &nettle_salsa20,
       NULL
     };
 
@@ -696,7 +700,20 @@ main(int argc, char **argv)
 
   alg = argv[optind];
 
-  time_init();
+  /* Choose timing function */
+#if TRY_CLOCK_GETTIME
+  if (cgt_works_p())
+    {
+      time_start = cgt_time_start;
+      time_end = cgt_time_end;
+    }
+  else
+    {
+      fprintf(stderr, "clock_gettime not working, falling back to clock\n");
+      time_start = clock_time_start;
+      time_end = clock_time_end;
+    }
+#endif
   bench_sha1_compress();
   bench_salsa20_core();
   bench_sha3_permute();
@@ -714,9 +731,6 @@ main(int argc, char **argv)
   for (i = 0; hashes[i]; i++)
     if (!alg || strstr(hashes[i]->name, alg))
       time_hash(hashes[i]);
-
-  if (!alg || strstr ("umac", alg))
-    time_umac();
 
   for (i = 0; ciphers[i]; i++)
     if (!alg || strstr(ciphers[i]->name, alg))

@@ -1,13 +1,9 @@
-divert(-1)
 changequote(<,>)dnl
 dnl (progn (modify-syntax-entry ?< "(>") (modify-syntax-entry ?> ")<") )
 
 dnl FORTRAN style comment character
 define(<C>, <
 dnl>)dnl
-dnl Disable m4 comment processing, since the default, #, is used for
-dnl constants on some architectures, in particular ARM.
-changecom()dnl
 
 dnl Including files from the srcdir
 define(<include_src>, <include(srcdir/$1)>)dnl
@@ -26,17 +22,14 @@ define(<EPILOGUE>,
 <ifelse(ELF_STYLE,yes,
 <.size C_NAME($1), . - C_NAME($1)>,<>)>)
 
-define(<m4_log2>, <m4_log2_internal($1,1,0)>)
-define(<m4_log2_internal>,
-<ifelse($3, 10, <not-a-power-of-two>,
-$1, $2, $3,
-<m4_log2_internal($1, eval(2*$2), eval(1 + $3))>)>)
+dnl Argument to ALIGN is always logarithmic
 
-dnl Argument to ALIGN is always in bytes, and converted to a
-dnl logarithmic .align if necessary.
-
+dnl Need changequote to be able to use the << operator (using **
+dnl instead is not portable, and is not supported by openbsd m4).
 define(<ALIGN>,
-<.align ifelse(ALIGN_LOG,yes,<m4_log2($1)>,$1)
+<changequote([,])dnl
+.align ifelse(ALIGN_LOG,yes,$1,eval(1 << $1))dnl >> balance
+changequote(<,>)dnl
 >)
 
 dnl Struct defining macros
@@ -75,5 +68,3 @@ STRUCTURE(AES)
   STRUCT(TABLE1, AES_TABLE_SIZE)
   STRUCT(TABLE2, AES_TABLE_SIZE)
   STRUCT(TABLE3, AES_TABLE_SIZE)
-
-divert

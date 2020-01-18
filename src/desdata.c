@@ -11,9 +11,15 @@
  *
  */
 
+#if HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include <stdio.h>
 
 #include	"desinfo.h"
+
+#include	"desCode.h"
 
 
 /* list of weak and semi-weak keys
@@ -59,18 +65,13 @@ int sorder[] = {
 };
 
 int
-main(int argc, char **argv)
+main(int argc UNUSED, char **argv UNUSED)
 {
-	unsigned long d, i, j, k, l, m, n, s; /* Always at least 32 bits */
+	uint32_t d, i, j, k, l, m, n, s;
 	char b[256], ksr[56];
-
-	if (argc <= 1)
-		return 1;
 
 	switch ( argv[1][0] ) {
 
-default: 
-	return 1;
 	/*
 	 * <<< make the key parity table >>>
 	 */
@@ -178,11 +179,11 @@ case 'k':
 			/* perform p permutation */
 			for ( m = j = 0; j < 32; j++ )
 				if ( n & (1 << (SP[j] - 1)) )
-					m |= (1UL << j);
+					m |= (1 << j);
 			/* rotate right (alg keeps everything rotated by 1) */
-			m = (m >> 1) | ((m & 1) << 31);
+			ROR(m, 1, 31);
 			/* print it out */
-			printf(" 0x%08lx,", m);
+			printf(" 0x%08lx,", (long) m);
 			if ( ( d & 3 ) == 3 )
 				printf("\n");
 		}

@@ -1,3 +1,4 @@
+C -*- mode: asm; asm-comment-char: ?C; -*-  
 C nettle, low-level cryptographics library
 C 
 C Copyright (C) 2010, Niels Möller
@@ -141,7 +142,7 @@ define(<FLINV>, <
 	C	          unsigned length, uint8_t *dst,
 	C	          uint8_t *src)
 	.text
-	ALIGN(16)
+	ALIGN(4)
 PROLOGUE(_nettle_camellia_crypt)
 	C save all registers that need to be saved
 	pushl	%ebx		C  32(%esp)

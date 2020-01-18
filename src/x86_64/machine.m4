@@ -2,10 +2,6 @@ C OFFSET(i)
 C Expands to 4*i, or to the empty string if i is zero
 define(<OFFSET>, <ifelse($1,0,,eval(4*$1))>)
 
-C OFFSET64(i)
-C Expands to 8*i, or to the empty string if i is zero
-define(<OFFSET64>, <ifelse($1,0,,eval(8*$1))>)
-
 dnl LREG(reg) gives the 8-bit register corresponding to the given 64-bit register.
 define(<LREG>,<ifelse(
 	$1, %rax, %al,
@@ -67,38 +63,38 @@ define(<XREG>,<ifelse(
 dnl W64_ENTRY(nargs, xmm_used)
 define(<W64_ENTRY>, <
   changequote([,])dnl
-  ifelse(<<<<<<<<<<<<<<<< ignored; only for balancing)
+  ifelse(<<<<<<<<<<<<<<< ignored; only for balancing)
   ifelse(W64_ABI,yes,[
     ifelse(eval($2 > 6), 1, [
       sub	[$]eval(8 + 16*($2 - 6)), %rsp
-      movdqu	%xmm6, 0(%rsp)
+      movdqa	%xmm6, 0(%rsp)
     ])
     ifelse(eval($2 > 7), 1, [
-      movdqu	%xmm7, 16(%rsp)
+      movdqa	%xmm7, 16(%rsp)
     ])
     ifelse(eval($2 > 8), 1, [
-      movdqu	%xmm8, 32(%rsp)
+      movdqa	%xmm8, 32(%rsp)
     ])
     ifelse(eval($2 > 9), 1, [
-      movdqu	%xmm9, 48(%rsp)
+      movdqa	%xmm9, 48(%rsp)
     ])
     ifelse(eval($2 > 10), 1, [
-      movdqu	%xmm10, 64(%rsp)
+      movdqa	%xmm10, 64(%rsp)
     ])
     ifelse(eval($2 > 11), 1, [
-      movdqu	%xmm11, 80(%rsp)
+      movdqa	%xmm11, 80(%rsp)
     ])
     ifelse(eval($2 > 12), 1, [
-      movdqu	%xmm12, 96(%rsp)
+      movdqa	%xmm12, 96(%rsp)
     ])
     ifelse(eval($2 > 13), 1, [
-      movdqu	%xmm13, 112(%rsp)
+      movdqa	%xmm13, 112(%rsp)
     ])
     ifelse(eval($2 > 14), 1, [
-      movdqu	%xmm14, 128(%rsp)
+      movdqa	%xmm14, 128(%rsp)
     ])
     ifelse(eval($2 > 15), 1, [
-      movdqu	%xmm15, 144(%rsp)
+      movdqa	%xmm15, 144(%rsp)
     ])
     ifelse(eval($1 >= 1), 1, [
       push	%rdi
@@ -115,11 +111,7 @@ define(<W64_ENTRY>, <
       mov	%r9, %rcx
     ])
     ifelse(eval($1 >= 5), 1, [
-      ifelse(eval($2 > 6), 1, [
-        mov	eval(8 + 16*($2 - 6) + 56)(%rsp), %r8
-      ], [
-        mov	56(%rsp), %r8
-      ])
+      mov	56(%rsp), %r8
     ])
   ])
   changequote(<,>)dnl
@@ -137,34 +129,34 @@ define(<W64_EXIT>, <
       pop	%rdi
     ])
     ifelse(eval($2 > 15), 1, [
-      movdqu	144(%rsp), %xmm15
+      movdqa	144(%rsp), %xmm15
     ])
     ifelse(eval($2 > 14), 1, [
-      movdqu	128(%rsp), %xmm14
+      movdqa	128(%rsp), %xmm14
     ])
     ifelse(eval($2 > 13), 1, [
-      movdqu	112(%rsp), %xmm13
+      movdqa	112(%rsp), %xmm13
     ])
     ifelse(eval($2 > 12), 1, [
-      movdqu	96(%rsp), %xmm12
+      movdqa	96(%rsp), %xmm12
     ])
     ifelse(eval($2 > 11), 1, [
-      movdqu	80(%rsp), %xmm11
+      movdqa	80(%rsp), %xmm11
     ])
     ifelse(eval($2 > 10), 1, [
-      movdqu	64(%rsp), %xmm10
+      movdqa	64(%rsp), %xmm10
     ])
     ifelse(eval($2 > 9), 1, [
-      movdqu	48(%rsp), %xmm9
+      movdqa	48(%rsp), %xmm9
     ])
     ifelse(eval($2 > 8), 1, [
-      movdqu	32(%rsp), %xmm8
+      movdqa	32(%rsp), %xmm8
     ])
     ifelse(eval($2 > 7), 1, [
-      movdqu	16(%rsp), %xmm7
+      movdqa	16(%rsp), %xmm7
     ])
     ifelse(eval($2 > 6), 1, [
-      movdqu	0(%rsp), %xmm6
+      movdqa	0(%rsp), %xmm6
       add	[$]eval(8 + 16*($2 - 6)), %rsp
     ])
   ])

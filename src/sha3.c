@@ -61,7 +61,7 @@ _sha3_update (struct sha3_state *state,
   if (pos > 0)
     {
       unsigned left = block_size - pos;
-      if (length < left)
+      if (length < pos)
 	{
 	  memcpy (block + pos, data, length);
 	  return pos + length;

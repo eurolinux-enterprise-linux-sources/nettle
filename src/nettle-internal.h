@@ -36,11 +36,11 @@
 
 #if HAVE_ALLOCA
 # define TMP_DECL(name, type, max) type *name
-# define TMP_ALLOC(name, size) (name = alloca(sizeof (*name) * (size)))
+# define TMP_ALLOC(name, size) (name = alloca(sizeof (*name) * size))
 #else /* !HAVE_ALLOCA */
 # define TMP_DECL(name, type, max) type name[max]
 # define TMP_ALLOC(name, size) \
-  do { if ((size) > (sizeof(name) / sizeof(name[0]))) abort(); } while (0)
+do { if (size > (sizeof(name) / sizeof(name[0]))) abort(); } while (0)
 #endif 
 
 /* Arbitrary limits which apply to systems that don't have alloca */
@@ -62,7 +62,6 @@ extern const struct nettle_cipher nettle_blowfish128;
 
 /* For benchmarking only, sets no iv and lies about the block size. */
 extern const struct nettle_cipher nettle_salsa20;
-extern const struct nettle_cipher nettle_salsa20r12;
 
 /* Glue to openssl, for comparative benchmarking. Code in
  * examples/nettle-openssl.c. */

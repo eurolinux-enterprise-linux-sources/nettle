@@ -1,97 +1,3 @@
-NEWS for the 2.7.1 release
-
-	This is a bugfix release.
-
-	Bug fixes:
-
-	* Fixed a bug in the new ECC code. The ecc_j_to_a function
-	  called GMP:s mpn_mul_n (via ecc_modp_mul) with overlapping
-	  input and output arguments, which is not supported.
-
-	* The assembly files for SHA1, SHA256 and AES depend on ARMv6
-          instructions, breaking nettle-2.7 for pre-v6 ARM processors.
-          The configure script now enables those assembly files only
-          when building for ARMv6 or later.
-	  
-	* Use a more portable C expression for rotations. The
-	  previous version used the following "standard" expression
-	  for 32-bit rotation:
-
-	    (x << n) | (x >> (32 - n))
-
-	  But this gives undefined behavior (according to the C
-	  specification) for n = 0. The rotate expression is replaced
-	  by the more portable:
-
-	    (x << n) | (x >> ((-n)&31))
-
-	  This change affects only CAST128, which uses non-constant
-	  rotation counts. Unfortunately, the new expression is poorly
-	  optimized by released versions of gcc, making CAST128 a bit
-	  slower. This is being fixed by the gcc hackers, see
-	  http://gcc.gnu.org/bugzilla/show_bug.cgi?id=57157.
-	  
-	The following problems have been reported, but are *not* fixed
-	in this release:
-
-	* ARM assembly files use instruction syntax which is not
-          supported by all assemblers. Workaround: Use a current
-          version of GNU as, or configure with --disable-assembler.
-
-	* Configuring with --disable-static doesn't work on windows.
-	
-	The libraries are intended to be binary compatible with
-	nettle-2.2 and later. The shared library names are
-	libnettle.so.4.7 and libhogweed.so.2.5, with sonames still
-	libnettle.so.4 and libhogweed.so.2.
-
-NEWS for the 2.7 release
-
-	This release includes an implementation of elliptic curve
-	cryptography (ECC) and optimizations for the ARM architecture.
-	This work was done at the offices of South Pole AB, and
-	generously funded by the .SE Internet Fund.
-
-	Bug fixes:
-
-	* Fixed a bug in the buffer handling for incremental SHA3
-	  hashing, with a possible buffer overflow. Patch by Edgar
-	  E. Iglesias.
-
-	New features:
-
-	* Support for ECDSA signatures. Elliptic curve operations over
-	  the following curves: secp192r1, secp224r1, secp256r1,
-	  secp384r1 and secp521r1, including x86_64 and ARM assembly
-	  for the most important primitives.
-	  
-	* Support for UMAC, including x86_64 and ARM assembly.
-
-	* Support for 12-round salsa20, "salsa20r12", as specified by
-	  eSTREAM. Contributed by Nikos Mavrogiannopoulos.
-	
-	Optimizations:
-
-	* ARM assembly code for several additional algorithms,
-	  including AES, Salsa20, and the SHA family of hash
-	  functions. 
-
-	* x86_64 assembly for SHA256, SHA512, and SHA3. (SHA3 assembly
-          was included in the 2.6 release, but disabled due to poor
-          performance on some AMD processors. Hopefully, that
-          performance problem is fixed now).
-	
-	The ARM code was tested and benchmarked on Cortex-A9. Some of
-	the functions use "neon" instructions. The configure script
-	decides if neon instructions can be used, and the command line
-	options --enable-arm-neon and --disable-arm-neon can be used
-	to override its choice. Feedback appreciated.
-	  
-	The libraries are intended to be binary compatible with
-	nettle-2.2 and later. The shared library names are
-	libnettle.so.4.6 and libhogweed.so.2.4, with sonames still
-	libnettle.so.4 and libhogweed.so.2.
-
 NEWS for the 2.6 release
 
 	Bug fixes:
@@ -105,17 +11,16 @@ NEWS for the 2.6 release
 
 	New features:
 
-	* Support for PKCS #5 PBKDF2, to generate a key from a
-          password or passphrase. Contributed by Simon Josefsson.
+	* Support for PKCS #5 PBKDF2. Contributed by Simon Josefsson.
           Specification in RFC 2898 and test vectors in RFC 6070.
+
+	* Support for GOST R 34.11-94 hash algorithm. Ported from librhash 
+	  by Nikos Mavrogiannopoulos. Written by Aleksey Kravchenko.
+	  More information in RFC4357. Test vectors taken from the GOST
+	  hash wikipedia page.
 
 	* Support for SHA3.
 	  
-	* Support for the GOST R 34.11-94 hash algorithm. Ported from
-	  librhash by Nikos Mavrogiannopoulos. Written by Aleksey
-	  Kravchenko. More information in RFC4357. Test vectors taken
-	  from the GOST hash wikipedia page.
-
 	Miscellaneous:
 
 	* The include file <nettle/sha.h> has been split into

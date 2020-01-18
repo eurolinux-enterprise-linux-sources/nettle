@@ -17,6 +17,12 @@ C along with the nettle library; see the file COPYING.LIB.  If not, write to
 C the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 C MA 02111-1301, USA.
 
+C NOTE: This code is currently unused. It gives a modest speedup on
+C Intel processors, running at roughly two instructions per cycle, and
+C a large slowdown on AMD processors, running at only a single
+C instruction per cycle. Maybe it can be rewritten to not move data
+C back and forth between xmm registers and regular 64-bit registers.
+
 define(<CTX>, <%rdi>)		C 25 64-bit values, 200 bytes.
 define(<COUNT>, <%r8>)		C Avoid clobbering %rsi, for W64.
 
@@ -66,22 +72,6 @@ define(<STATE>, <OFFSET($1)(CTX)>)
 
 define(<SWAP64>, <pshufd	<$>0x4e,>)
 
-define(<DIRECT_MOVQ>, <no>)
-
-C MOVQ(src, dst), for moves between a general register and an xmm
-C register.
-
-ifelse(DIRECT_MOVQ, yes, <
-C movq calls that are equal to the corresponding movd,
-C where the Apple assembler requires them to be written as movd.
-define(<MOVQ>, <movd	$1, $2>)
->, <
-C Moving via (cached) memory is generally faster.
-define(<MOVQ>, <
-	movq	$1, (CTX)
-	movq	(CTX), $2
->)>)
-
 C ROTL64(rot, register, temp)
 C Caller needs to or together the result.
 define(<ROTL64>, <
@@ -94,7 +84,7 @@ define(<ROTL64>, <
 	
 	C sha3_permute(struct sha3_state *ctx)
 	.text
-	ALIGN(16)
+	ALIGN(4)
 PROLOGUE(nettle_sha3_permute)
 	W64_ENTRY(1, 16)
 	push	%rbp
@@ -139,7 +129,7 @@ PROLOGUE(nettle_sha3_permute)
 	pxor	A2122, C12
 	pxor	A2324, C34
 	
-	ALIGN(16)
+	ALIGN(4)
 .Loop:
 	C The theta step. Combine parity bits, then xor to state.
 	C D0 = C4 ^ (C1 <<< 1)
@@ -157,12 +147,12 @@ PROLOGUE(nettle_sha3_permute)
 
 	SWAP64	C34, C34		C Holds C4, C3
 	movdqa	C12, D34
-	MOVQ(C0, D12)
+	movq	C0, D12
 	punpcklqdq	C12, D12	C Holds C0, C1
 	punpckhqdq	C34, D34	C Holds C2, C3
 	punpcklqdq	D12, C34	C Holds	C4, C0
-	MOVQ(C34, D0)
-	MOVQ(C12, T0)
+	movq	C34, D0
+	movq	C12, T0
 	rolq	$1, T0
 	xorq	T0, D0
 
@@ -246,8 +236,8 @@ PROLOGUE(nettle_sha3_permute)
 	C   `-_________-^`-^
 	
 	rolq	$36, A05
-	MOVQ(A05, W0)
-	MOVQ(A0607, A05)
+	movq	A05, W0
+	movq	A0607, A05
 	rolq	$44, A05		C Done A05
 	ROTL64(6, A0607, W1)
 	por	A0607, W1
@@ -270,8 +260,8 @@ PROLOGUE(nettle_sha3_permute)
 
 	rolq	$42, A10		C 42 + 25 = 3 (mod 64)
 	SWAP64	A1112, W0
-	MOVQ(A10, A1112)
-	MOVQ(W0, A10)
+	movq	A10, A1112
+	movq	W0, A10
 	rolq	$43, A10		C Done A10
 
 	punpcklqdq	A1314, A1112
@@ -295,8 +285,8 @@ PROLOGUE(nettle_sha3_permute)
 
 	SWAP64	A1819, W0
 	rolq	$41, A15
-	MOVQ(A15, W1)
-	MOVQ(A1819, A15)
+	movq	A15, W1
+	movq	A1819, A15
 	rolq	$21, A15		C Done A15
 	SWAP64	A1617, A1819
 	ROTL64(45, A1617, W2)
@@ -318,7 +308,7 @@ PROLOGUE(nettle_sha3_permute)
 	C    \_______/
 
 	rolq	$18, A20
-	MOVQ(A20, W0)
+	movq	A20, W0
 	SWAP64	A2324, W1
 	movd	W1, A20
 	rolq	$14, A20		C Done A20
@@ -396,21 +386,21 @@ PROLOGUE(nettle_sha3_permute)
 	C Swap (A05, A10) <->  A0102, and (A15, A20) <->  A0304,
 	C and also copy to C12 and C34 while at it.
 	
-	MOVQ(A05, C12)
-	MOVQ(A15, C34)
-	MOVQ(A10, W0)
-	MOVQ(A20, W1)
+	movq	A05, C12
+	movq	A15, C34
+	movq	A10, W0
+	movq	A20, W1
 	movq	A00, C0
 	punpcklqdq	W0, C12
 	punpcklqdq	W1, C34
-	MOVQ(A0102, A05)
-	MOVQ(A0304, A15)
+	movq	A0102, A05
+	movq	A0304, A15
 	psrldq	$8, A0102
 	psrldq	$8, A0304
 	xorq	A05, C0
 	xorq	A15, C0
-	MOVQ(A0102, A10)
-	MOVQ(A0304, A20)
+	movq	A0102, A10
+	movq	A0304, A20
 
 	movdqa	C12, A0102
 	movdqa	C34, A0304
@@ -483,7 +473,7 @@ PROLOGUE(nettle_sha3_permute)
 
 EPILOGUE(nettle_sha3_permute)
 
-ALIGN(16)
+ALIGN(4)
 .rc:	C In reverse order
 	.quad	0x8000000080008008
 	.quad	0x0000000080000001
